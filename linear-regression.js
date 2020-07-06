@@ -51,15 +51,15 @@ class LinearRegression {
         .div(this.features.shape[0]);
 
         // ToDo, uncomment once issue is fixed
-        // this.weights = this.weights.sub(gradients.mul(this.options.learningRate));
+        this.weights = this.weights.sub(gradients.mul(this.options.learningRate));
 
-        // Issue demo
-        this.weights.sub(gradients.mul(this.options.learningRate)).print(); // prints "good" values
-        const newW = this.weights.sub(gradients.mul(this.options.learningRate));
-        newW.print(); //prints "good" values
-        // console.log(newW.shape);
-        // Actual issue in next line
-        // this.weights = newW; //This line when not commented changes weights to NaN [2,1] tensor
+        // // Issue demo
+        // this.weights.sub(gradients.mul(this.options.learningRate)).print(); // prints "good" values
+        // const newW = this.weights.sub(gradients.mul(this.options.learningRate));
+        // newW.print(); //prints "good" values
+        // // console.log(newW.shape);
+        // // Actual issue in next line
+        // // this.weights = newW; //This line when not commented changes weights to NaN [2,1] tensor
     }
 
 // iterate gradientDescent() until optimal m,b
@@ -100,13 +100,23 @@ class LinearRegression {
 
     processFeatures( features) {
         features = tf.tensor(features);
-        features = tf.ones([features.shape[0], 1]).concat(features, 1);
 
+        if (this.mean && this.variance) {
+            features = features.sub(this.mean).div(this.variance.pow(0.5));
+        }
+        else {
+            features = this.stdandardize(features);
+        }
+        features = tf.ones([features.shape[0], 1]).concat(features, 1);
         return features;
     }
 
     stdandardize(features) {
         const {mean, variance } = tf.moments(features, 0);
+        this.mean = mean;
+        this.variance = variance;
+
+        return features.sub(this.mean).div(this.variance.pow(0.5));
     }
 }
 
